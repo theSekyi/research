@@ -2203,4 +2203,5 @@ def mnist_parameters(anomaly_label, Net2, mnist_params):
         loss,
         query_strategy,
         mnist_test_path,
+        custom_model,
     )

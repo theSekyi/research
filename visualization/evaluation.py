@@ -1429,6 +1429,3 @@ def frac_mcc_compare_softmax_focal_iso(
     sns.despine()
     plt.savefig(fig_name)
     plt.show()
-
-
-def 
