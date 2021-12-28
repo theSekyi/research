@@ -451,6 +451,7 @@ def get_latent(
     anomaly_label,
     loss,
     query_strategy,
+    train_once,
     device,
 ):
     print(f"{color.PURPLE}Latent Space for Night {i +1}{color.END}")
@@ -462,18 +463,22 @@ def get_latent(
     train_loader = torch.utils.data.DataLoader(train_ds, sampler=sampler, batch_size=batch_size_train, drop_last=True)
     test_loader = torch.utils.data.DataLoader(test_ds, batch_size=batch_size_test, shuffle=True)
 
-    _, network_saved = training_loop(
-        n_epoch,
-        optim,
-        Net,
-        train_loader,
-        learning_rate,
-        momentum,
-        saved_model_path,
-        train,
-        loss,
-        device,
-    )
+    if train_once and i == 0:
+        _, network_saved = training_loop(
+            n_epoch,
+            optim,
+            Net,
+            train_loader,
+            learning_rate,
+            momentum,
+            saved_model_path,
+            train,
+            loss,
+            device,
+        )
+    else:
+        Net.load_state_dict(torch.load(saved_model_path))
+        network_saved = Net
 
     if network_saved._get_name() == "ResNet":
         layer = network_saved.avgpool
@@ -527,6 +532,7 @@ def get_ahunt(
     initial_training_config,
     loss,
     query_strategy,
+    train_once,
     device,
 ):
     print(f"{color.PURPLE}Ahunt for Night {i +1}{color.END}")
@@ -536,18 +542,22 @@ def get_ahunt(
 
     train_loader = torch.utils.data.DataLoader(train_ds, sampler=sampler, batch_size=batch_size_train, drop_last=True)
 
-    _, network_saved = training_loop(
-        n_epoch,
-        optim,
-        Net,
-        train_loader,
-        learning_rate,
-        momentum,
-        saved_model_path,
-        train,
-        loss,
-        device,
-    )
+    if train_once and i == 0:
+        _, network_saved = training_loop(
+            n_epoch,
+            optim,
+            Net,
+            train_loader,
+            learning_rate,
+            momentum,
+            saved_model_path,
+            train,
+            loss,
+            device,
+        )
+    else:
+        Net.load_state_dict(torch.load(saved_model_path))
+        network_saved = Net
 
     test_ds = ImageFolderWithPaths(testing_path, transform=_transforms)
     test_loader = torch.utils.data.DataLoader(test_ds, batch_size=batch_size_test, shuffle=True)
@@ -615,6 +625,7 @@ def get_combined_output(
     initial_training_config,
     loss,
     query_strategy,
+    train_once,
     device,
 ):
     iso_rws = []
@@ -670,6 +681,7 @@ def get_combined_output(
             anomaly_label,
             loss,
             query_strategy,
+            train_once,
             device,
         )
         latent_mcc.append(_latent_mcc)
@@ -696,6 +708,7 @@ def get_combined_output(
             initial_training_config,
             loss,
             query_strategy,
+            train_once,
             device,
         )
 
@@ -2177,6 +2190,7 @@ def mnist_parameters(anomaly_label, Net2, mnist_params):
     loss = mnist_params["loss"]
     query_strategy = mnist_params["query_strategy"]
     custom_model = mnist_params["custom_model"]
+    train_once = mnist_params["train_once"]
 
     _transforms, _test_transform = get_transforms_mnist()
     test_pth = test_paths(mnist_test_path)
@@ -2204,4 +2218,5 @@ def mnist_parameters(anomaly_label, Net2, mnist_params):
         query_strategy,
         mnist_test_path,
         custom_model,
+        train_once,
     )
