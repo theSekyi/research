@@ -233,7 +233,12 @@ def train(
 
 
 def get_network_and_optimizer(Net, optimizer, learning_rate, momentum):
-    network = Net
+    network_type = Net.__class__.__name__  # get name of architecture. Please dont do this. This a hack
+
+    if network_type == "ResNet":
+        network = Net
+    else:
+        network = Net()
 
     optimizer = optimizer.SGD(network.parameters(), lr=learning_rate, momentum=momentum)
     return network, optimizer
@@ -262,7 +267,7 @@ def training_loop(
 
     train_losses = []
     for epoch in range(1, n_epoch):
-        # print(f"{color.BOLD}Epoch {epoch}/{n_epoch - 1} {color.END}")
+        print(f"{color.BOLD}Epoch {epoch}/{n_epoch - 1} {color.END}")
         train_loss, model = train_func(
             epoch,
             optimizer,

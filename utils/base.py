@@ -463,7 +463,24 @@ def get_latent(
     train_loader = torch.utils.data.DataLoader(train_ds, sampler=sampler, batch_size=batch_size_train, drop_last=True)
     test_loader = torch.utils.data.DataLoader(test_ds, batch_size=batch_size_test, shuffle=True)
 
-    if train_once and i == 0:
+    if train_once:
+        if i == 0:
+            _, network_saved = training_loop(
+                n_epoch,
+                optim,
+                Net,
+                train_loader,
+                learning_rate,
+                momentum,
+                saved_model_path,
+                train,
+                loss,
+                device,
+            )
+        else:
+            Net.load_state_dict(torch.load(saved_model_path))
+            network_saved = Net
+    else:
         _, network_saved = training_loop(
             n_epoch,
             optim,
@@ -476,9 +493,6 @@ def get_latent(
             loss,
             device,
         )
-    else:
-        Net.load_state_dict(torch.load(saved_model_path))
-        network_saved = Net
 
     if network_saved._get_name() == "ResNet":
         layer = network_saved.avgpool
@@ -542,7 +556,24 @@ def get_ahunt(
 
     train_loader = torch.utils.data.DataLoader(train_ds, sampler=sampler, batch_size=batch_size_train, drop_last=True)
 
-    if train_once and i == 0:
+    if train_once:
+        if i == 0:
+            _, network_saved = training_loop(
+                n_epoch,
+                optim,
+                Net,
+                train_loader,
+                learning_rate,
+                momentum,
+                saved_model_path,
+                train,
+                loss,
+                device,
+            )
+        else:
+            Net.load_state_dict(torch.load(saved_model_path))
+            network_saved = Net
+    else:
         _, network_saved = training_loop(
             n_epoch,
             optim,
@@ -555,9 +586,6 @@ def get_ahunt(
             loss,
             device,
         )
-    else:
-        Net.load_state_dict(torch.load(saved_model_path))
-        network_saved = Net
 
     test_ds = ImageFolderWithPaths(testing_path, transform=_transforms)
     test_loader = torch.utils.data.DataLoader(test_ds, batch_size=batch_size_test, shuffle=True)
@@ -2195,7 +2223,7 @@ def mnist_parameters(anomaly_label, Net2, mnist_params):
     _transforms, _test_transform = get_transforms_mnist()
     test_pth = test_paths(mnist_test_path)
 
-    classifier = Net2()
+    classifier = Net2
 
     return (
         test_pth,
@@ -2217,6 +2245,61 @@ def mnist_parameters(anomaly_label, Net2, mnist_params):
         loss,
         query_strategy,
         mnist_test_path,
+        custom_model,
+        train_once,
+    )
+
+
+def cifar_parameters(anomaly_label, classifier, cifar_params):
+    collective_test_path = "data/cifar/testing_main/ahunt"
+    training_path = "data/cifar/training"
+    cifar_test_path = "data/cifar/testing"
+
+    train_latent_path = f"{training_path}/latent"
+    train_ahunt_path = f"{training_path}/ahunt"
+    train_iforest_path = f"{training_path}/iforest"
+
+    saved_model_path = "data/cifar/results/model.pth"
+
+    n_epoch = cifar_params["n_epoch"]
+    batch_size_train = 64
+    batch_size_test = 32
+    learning_rate = 0.01
+    momentum = 0.5
+    log_interval = 10
+    num_to_display = 6
+
+    iforest_use_all = True
+    use_cummulative_test = True
+
+    loss = cifar_params["loss"]
+    query_strategy = cifar_params["query_strategy"]
+    custom_model = cifar_params["custom_model"]
+    train_once = cifar_params["train_once"]
+
+    _transforms, _test_transform = get_transforms_mnist()
+    test_pth = test_paths(cifar_test_path)
+
+    return (
+        test_pth,
+        _transforms,
+        iforest_use_all,
+        train_iforest_path,
+        train_latent_path,
+        train_ahunt_path,
+        batch_size_train,
+        batch_size_test,
+        n_epoch,
+        classifier,
+        learning_rate,
+        momentum,
+        saved_model_path,
+        anomaly_label,
+        collective_test_path,
+        use_cummulative_test,
+        loss,
+        query_strategy,
+        cifar_test_path,
         custom_model,
         train_once,
     )
