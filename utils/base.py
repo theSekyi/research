@@ -2209,8 +2209,6 @@ def mnist_parameters(anomaly_label, Net2, mnist_params):
     batch_size_test = 32
     learning_rate = 0.01
     momentum = 0.5
-    log_interval = 10
-    num_to_display = 6
 
     iforest_use_all = True
     use_cummulative_test = True
