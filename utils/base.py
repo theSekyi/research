@@ -495,7 +495,7 @@ def get_latent(
         )
 
     if network_saved._get_name() == "ResNet":
-        layer = network_saved.avgpool
+        layer = network_saved.layer4[0].conv2
     else:
         layer = network_saved.fc1
 
