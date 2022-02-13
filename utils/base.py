@@ -495,13 +495,17 @@ def get_latent(
         )
 
     if network_saved._get_name() == "ResNet":
-        layer = network_saved.layer4[0].conv2
+        layer = network_saved.fc[4]
     else:
         layer = network_saved.fc1
 
     all_test_paths, labels_np, scores_decision, test_labels = results_from_latent(
         network_saved, train_ds, test_ds, _transforms, anomaly_label, device, layer
     )
+
+    # all_test_paths, labels_np, scores_decision = results_from_latent_trial(
+    #     network_saved, train_ds, test_ds, anomaly_label, device, layer
+    # )
 
     num_to_display = np.sum(labels_np)
 
