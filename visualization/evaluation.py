@@ -1363,49 +1363,49 @@ def frac_mcc_compare_softmax_focal_iso(
 
     if plot_ahunt:
         # MCC
-        mean, lower_quartile, upper_quartile = analyze(softmax_ahunt_mcc, cl=25)
+        mean, lower_quartile, upper_quartile = analyze(softmax_ahunt_mcc, cl=2.5)
         a_plt_fill(ax1, x, mean, lower_quartile, upper_quartile, "b", f"AHunt_{loss_1}")
         ax1.set_xlabel("Rounds", fontsize=font_size)
         ax1.set_ylabel("MCC Score", fontsize=font_size)
 
-        mean, lower_quartile, upper_quartile = analyze(focal_ahunt_mcc, cl=25)
+        mean, lower_quartile, upper_quartile = analyze(focal_ahunt_mcc, cl=2.5)
         a_plt_fill(ax1, x, mean, lower_quartile, upper_quartile, "g", f"AHunt_{loss_2}")
         ax1.set_xlabel("Rounds", fontsize=font_size)
         ax1.set_ylabel("MCC Score", fontsize=font_size)
 
-        mean, lower_quartile, upper_quartile = analyze(iso_ahunt_mcc, cl=25)
+        mean, lower_quartile, upper_quartile = analyze(iso_ahunt_mcc, cl=2.5)
         a_plt_fill(ax1, x, mean, lower_quartile, upper_quartile, "m", f"AHunt_{loss_3}")
         ax1.set_xlabel("Rounds", fontsize=font_size)
         ax1.set_ylabel("MCC Score", fontsize=font_size)
 
         # FRACTION
-        mean, lower_quartile, upper_quartile = analyze(softmax_ahunt_frac, cl=25)
+        mean, lower_quartile, upper_quartile = analyze(softmax_ahunt_frac, cl=2.5)
         a_plt_fill(ax2, x, mean, lower_quartile, upper_quartile, "b", f"AHunt_{loss_1}")
         ax2.set_xlabel("Rounds", fontsize=font_size)
         ax2.set_ylabel("Fraction of anomalies", fontsize=font_size)
 
-        mean, lower_quartile, upper_quartile = analyze(focal_ahunt_frac, cl=25)
+        mean, lower_quartile, upper_quartile = analyze(focal_ahunt_frac, cl=2.5)
         a_plt_fill(ax2, x, mean, lower_quartile, upper_quartile, "g", f"AHunt_{loss_2}")
         ax2.set_xlabel("Rounds", fontsize=font_size)
         ax2.set_ylabel("Fraction of anomalies", fontsize=font_size)
 
-        mean, lower_quartile, upper_quartile = analyze(iso_ahunt_frac, cl=25)
+        mean, lower_quartile, upper_quartile = analyze(iso_ahunt_frac, cl=2.5)
         a_plt_fill(ax2, x, mean, lower_quartile, upper_quartile, "m", f"AHunt_{loss_3}")
         ax2.set_xlabel("Rounds", fontsize=font_size)
         ax2.set_ylabel("Fraction of anomalies", fontsize=font_size)
     else:
         # MCC
-        mean, lower_quartile, upper_quartile = analyze(softmax_latent_mcc, cl=25)
+        mean, lower_quartile, upper_quartile = analyze(softmax_latent_mcc, cl=2.5)
         a_plt_fill(ax1, x, mean, lower_quartile, upper_quartile, "b", f"Iforest_Latent-learning_{loss_1}")
         ax1.set_xlabel("Rounds", fontsize=font_size)
         ax1.set_ylabel("MCC Score", fontsize=font_size)
 
-        mean, lower_quartile, upper_quartile = analyze(focal_latent_mcc, cl=25)
+        mean, lower_quartile, upper_quartile = analyze(focal_latent_mcc, cl=2.5)
         a_plt_fill(ax1, x, mean, lower_quartile, upper_quartile, "g", f"Iforest_Latent-learning_{loss_2}")
         ax1.set_xlabel("Rounds", fontsize=font_size)
         ax1.set_ylabel("MCC Score", fontsize=font_size)
 
-        mean, lower_quartile, upper_quartile = analyze(iso_latent_mcc, cl=25)
+        mean, lower_quartile, upper_quartile = analyze(iso_latent_mcc, cl=2.5)
         a_plt_fill(ax1, x, mean, lower_quartile, upper_quartile, "m", f"Iforest_Latent-learning_{loss_3}")
         ax1.set_xlabel("Rounds", fontsize=font_size)
         ax1.set_ylabel("MCC Score", fontsize=font_size)
@@ -1428,4 +1428,102 @@ def frac_mcc_compare_softmax_focal_iso(
 
     sns.despine()
     plt.savefig(fig_name)
+    plt.show()
+
+
+def general_plot(
+    mnist_all_iso_mcc,
+    mnist_all_latent_mcc,
+    mnist_all_ahunt_mcc,
+    cifar_all_iso_mcc,
+    cifar_all_latent_mcc,
+    cifar_all_ahunt_mcc,
+    galaxy_all_iso_mcc,
+    galaxy_all_latent_mcc,
+    galaxy_all_ahunt_mcc,
+    fig_name,
+    font_size,
+    figsize=(22, 8),
+):
+    x = np.arange(len(mnist_all_iso_mcc[0]))
+
+    fig, ((ax1, ax2, ax3)) = plt.subplots(nrows=1, ncols=3, figsize=figsize)
+
+    # fig.suptitle(
+    #     f"Improvement of Ahunt after {len(all_ahunt_rws_iso[0])} rounds of training",
+    #     fontsize=14,
+    # )
+    fig.subplots_adjust(top=0.94)  # Aligns title properly in the presence of fig.tight_layout
+    fig.tight_layout(pad=4)
+
+    # MNIST
+    mean, lower_quartile, upper_quartile = analyze(mnist_all_iso_mcc, cl=25)
+    a_plt_fill(ax1, x, mean, lower_quartile, upper_quartile, "y", "iforest-raw")
+
+    mean, lower_quartile, upper_quartile = analyze(mnist_all_latent_mcc, cl=25)
+    a_plt_fill(ax1, x, mean, lower_quartile, upper_quartile, "g", "iforest_latent-learning")
+
+    mean, lower_quartile, upper_quartile = analyze(mnist_all_ahunt_mcc, cl=25)
+    a_plt_fill(ax1, x, mean, lower_quartile, upper_quartile, "b", "AHunt")
+
+    ax1.set_xlabel("Rounds", fontsize=font_size)
+    ax1.set_ylabel("MCC Score", fontsize=font_size)
+
+    # CIFAR
+    mean, lower_quartile, upper_quartile = analyze(cifar_all_iso_mcc, cl=25)
+    a_plt_fill(ax2, x, mean, lower_quartile, upper_quartile, "y", "iforest-raw")
+
+    mean, lower_quartile, upper_quartile = analyze(cifar_all_latent_mcc, cl=25)
+    a_plt_fill(ax2, x, mean, lower_quartile, upper_quartile, "g", "iforest_latent-learning")
+
+    mean, lower_quartile, upper_quartile = analyze(cifar_all_ahunt_mcc, cl=25)
+    a_plt_fill(ax2, x, mean, lower_quartile, upper_quartile, "b", "AHunt")
+
+    ax2.set_xlabel("Rounds", fontsize=font_size)
+    ax2.set_ylabel("MCC Score", fontsize=font_size)
+
+    # Galaxy Zoo
+    mean, lower_quartile, upper_quartile = analyze(galaxy_all_iso_mcc, cl=25)
+    a_plt_fill(ax3, x, mean, lower_quartile, upper_quartile, "y", "iforest-raw")
+
+    mean, lower_quartile, upper_quartile = analyze(galaxy_all_latent_mcc, cl=25)
+    a_plt_fill(ax3, x, mean, lower_quartile, upper_quartile, "g", "iforest_latent-learning")
+
+    mean, lower_quartile, upper_quartile = analyze(galaxy_all_ahunt_mcc, cl=25)
+    a_plt_fill(ax3, x, mean, lower_quartile, upper_quartile, "b", "AHunt")
+
+    ax3.set_xlabel("Rounds", fontsize=font_size)
+    ax3.set_ylabel("MCC Score", fontsize=font_size)
+
+    # sns.despine()
+
+    plt.savefig(fig_name)
+    plt.show()
+
+
+def plot_mcc(all_iso_mcc, all_latent_mcc, all_ahunt_mcc, font_size=16, figsize=(8, 6)):
+    #     fig_name = "trial.png"
+
+    plt.style.use("seaborn-dark-palette")
+    rounds = len(all_iso_mcc[0])
+
+    x = np.arange(rounds)
+
+    fig, ax2 = plt.subplots(nrows=1, ncols=1, figsize=figsize)
+    fig.tight_layout(pad=4)
+    fig.subplots_adjust(top=0.94)  # Aligns title properly in the presence of fig.tight_layout
+
+    mean, lower_quartile, upper_quartile = analyze(all_iso_mcc, cl=2.5)
+    a_plt_fill(ax2, x, mean, lower_quartile, upper_quartile, "y", "iforest-raw")
+
+    mean, lower_quartile, upper_quartile = analyze(all_latent_mcc, cl=2.5)
+    a_plt_fill(ax2, x, mean, lower_quartile, upper_quartile, "g", "iforest_latent-learning")
+
+    mean, lower_quartile, upper_quartile = analyze(all_ahunt_mcc, cl=2.5)
+    a_plt_fill(ax2, x, mean, lower_quartile, upper_quartile, "b", "AHunt")
+
+    ax2.set_xlabel("Rounds", fontsize=font_size)
+    ax2.set_ylabel("MCC Score", fontsize=font_size)
+
+    #     plt.savefig(fig_name)
     plt.show()
