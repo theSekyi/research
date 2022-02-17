@@ -1775,7 +1775,8 @@ def cp_to_init(src, dest):
         if f.is_dir() and f.name.split("_")[-1] == "0":
             first_folder.append(f.name)
     full_src = f"{src}/{first_folder[0]}"
-    shutil.copytree(full_src, dest, dirs_exist_ok=True)
+    pathlib.Path(dest).mkdir(parents=True, exist_ok=True)
+    shutil.copytree(full_src, dest)
 
 
 def get_np_imgs(ds):
@@ -1963,7 +1964,11 @@ def initialize_pool(src, dest):
     """Initialize the data Pool. Take data from source to the pool"""
     shutil.rmtree(dest)
     pathlib.Path(dest).mkdir(parents=True, exist_ok=True)
-    shutil.copytree(src, dest, dirs_exist_ok=True)
+    shutil.copytree(src, dest)
+
+
+def is_dir(dir_path):
+    return Path(dir_path).is_dir()
 
 
 def rm_folders(*args):
