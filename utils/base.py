@@ -496,6 +496,7 @@ def get_latent(
 
     if network_saved._get_name() == "ResNet":
         layer = network_saved.fc[4]
+        # layer = network_saved.avgpool[4]
     else:
         layer = network_saved.fc1
 
@@ -2000,22 +2001,22 @@ def get_transforms():
 
     _transform = transforms.Compose(
         [
-            # transforms.RandomApply(
-            #     [
-            #         transforms.ColorJitter(),
-            #         transforms.GaussianBlur(11, sigma=(0.1, 2.0)),
-            #         # transforms.RandomErasing(),
-            #     ],
-            #     p=0.3,
-            # ),
+            transforms.RandomApply(
+                [
+                    transforms.ColorJitter(),
+                    transforms.GaussianBlur(11, sigma=(0.1, 2.0)),
+                    # transforms.RandomErasing(),
+                ],
+                p=0.3,
+            ),
             transforms.RandomAffine(10, scale=(0.8, 1.2)),
-            # transforms.Resize((128, 128)),
+            transforms.Resize((64, 64)),
             transforms.ToTensor(),
         ]
     )
     _test_transform = transforms.Compose(
         [
-            # transforms.Resize((128, 128)),
+            transforms.Resize((64, 64)),
             transforms.RandomAffine(10, scale=(0.8, 1.2)),
             transforms.ToTensor(),
         ]
@@ -2302,6 +2303,61 @@ def cifar_parameters(anomaly_label, classifier, cifar_params):
         loss,
         query_strategy,
         cifar_test_path,
+        custom_model,
+        train_once,
+    )
+
+
+def galaxy_parameters(anomaly_label, classifier, galaxy_params):
+    collective_test_path = "data/galaxy_zoo/testing_main/ahunt"
+    training_path = "data/galaxy_zoo/training"
+    galaxy_test_path = "data/galaxy_zoo/testing"
+
+    train_latent_path = f"{training_path}/latent"
+    train_ahunt_path = f"{training_path}/ahunt"
+    train_iforest_path = f"{training_path}/iforest"
+
+    saved_model_path = "data/galaxy_zoo/results/model.pth"
+
+    n_epoch = galaxy_params["n_epoch"]
+    batch_size_train = 64
+    batch_size_test = 32
+    learning_rate = 0.01
+    momentum = 0.5
+    log_interval = 10
+    num_to_display = 6
+
+    iforest_use_all = True
+    use_cummulative_test = True
+
+    loss = galaxy_params["loss"]
+    query_strategy = galaxy_params["query_strategy"]
+    custom_model = galaxy_params["custom_model"]
+    train_once = galaxy_params["train_once"]
+
+    test_pth = test_paths(galaxy_test_path)
+    _transforms, _test_transform = get_transforms_mnist()
+
+    return (
+        test_pth,
+        _transforms,
+        iforest_use_all,
+        train_iforest_path,
+        train_latent_path,
+        train_ahunt_path,
+        batch_size_train,
+        batch_size_test,
+        n_epoch,
+        classifier,
+        learning_rate,
+        momentum,
+        saved_model_path,
+        anomaly_label,
+        collective_test_path,
+        use_cummulative_test,
+        loss,
+        query_strategy,
+        galaxy_test_path,
         custom_model,
         train_once,
     )
