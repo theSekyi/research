@@ -1776,7 +1776,7 @@ def cp_to_init(src, dest):
             first_folder.append(f.name)
     full_src = f"{src}/{first_folder[0]}"
     pathlib.Path(dest).mkdir(parents=True, exist_ok=True)
-    shutil.copytree(full_src, dest)
+    copytree(full_src, dest)
 
 
 def get_np_imgs(ds):
@@ -1960,11 +1960,24 @@ def get_basic_config(rounds, data_config, anomaly_label, constant_anomaly_size=T
     return all_data_config
 
 
+def copytree(src, dst, symlinks=False, ignore=None):
+    if not os.path.exists(dst):
+        os.makedirs(dst)
+    for item in os.listdir(src):
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if os.path.isdir(s):
+            copytree(s, d, symlinks, ignore)
+        else:
+            if not os.path.exists(d) or os.stat(s).st_mtime - os.stat(d).st_mtime > 1:
+                shutil.copy2(s, d)
+
+
 def initialize_pool(src, dest):
     """Initialize the data Pool. Take data from source to the pool"""
     shutil.rmtree(dest)
     pathlib.Path(dest).mkdir(parents=True, exist_ok=True)
-    shutil.copytree(src, dest)
+    copytree(src, dest)
 
 
 def is_dir(dir_path):
