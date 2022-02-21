@@ -1527,3 +1527,91 @@ def plot_mcc(all_iso_mcc, all_latent_mcc, all_ahunt_mcc, font_size=16, figsize=(
 
     #     plt.savefig(fig_name)
     plt.show()
+
+
+def plot_loss_functions(
+    softmax_1_ahunt_mcc,
+    iso_1_ahunt_mcc,
+    focal_1_ahunt_mcc,
+    softmax_8_ahunt_mcc,
+    iso_8_ahunt_mcc,
+    focal_8_ahunt_mcc,
+    fig_name,
+    font_size,
+    figsize=(10, 8),
+):
+    x = np.arange(len(softmax_1_ahunt_mcc[0]))
+
+    fig, ((ax1, ax2)) = plt.subplots(nrows=1, ncols=2, figsize=figsize)
+
+    # fig.suptitle(
+    #     f"Improvement of Ahunt after {len(all_ahunt_rws_iso[0])} rounds of training",
+    #     fontsize=14,
+    # )
+    fig.subplots_adjust(top=0.94)  # Aligns title properly in the presence of fig.tight_layout
+    fig.tight_layout(pad=4)
+
+    # One Anomaly Subclass
+    mean, lower_quartile, upper_quartile = analyze(softmax_1_ahunt_mcc, cl=2.5)
+    a_plt_fill(
+        ax1,
+        x,
+        mean,
+        lower_quartile,
+        upper_quartile,
+        "y",
+        "1 Anomaly Subclass",
+        "SoftMax",
+    )
+
+    mean, lower_quartile, upper_quartile = analyze(iso_1_ahunt_mcc, cl=2.5)
+    a_plt_fill(
+        ax1,
+        x,
+        mean,
+        lower_quartile,
+        upper_quartile,
+        "g",
+        "1 Anomaly Subclass",
+        "IsoMax",
+    )
+
+    mean, lower_quartile, upper_quartile = analyze(focal_1_ahunt_mcc, cl=2.5)
+    a_plt_fill(ax1, x, mean, lower_quartile, upper_quartile, "b", "1 Anomaly Subclass", "Focal")
+
+    ax1.set_xlabel("Rounds", fontsize=font_size)
+    ax1.set_ylabel("MCC Score", fontsize=font_size)
+
+    # 8 Anomaly Subclass
+    mean, lower_quartile, upper_quartile = analyze(softmax_8_ahunt_mcc, cl=2.5)
+    a_plt_fill(
+        ax2,
+        x,
+        mean,
+        lower_quartile,
+        upper_quartile,
+        "y",
+        "8 Anomaly Subclass",
+        "SoftMax",
+    )
+
+    mean, lower_quartile, upper_quartile = analyze(iso_8_ahunt_mcc, cl=2.5)
+    a_plt_fill(
+        ax2,
+        x,
+        mean,
+        lower_quartile,
+        upper_quartile,
+        "g",
+        "8 Anomaly Subclass",
+        "IsoMax",
+    )
+
+    mean, lower_quartile, upper_quartile = analyze(focal_8_ahunt_mcc, cl=2.5)
+    a_plt_fill(ax2, x, mean, lower_quartile, upper_quartile, "b", "8 Anomaly Subclass", "Focal")
+
+    ax2.set_xlabel("Rounds", fontsize=font_size)
+    ax2.set_ylabel("MCC Score", fontsize=font_size)
+
+    plt.savefig(fig_name)
+    plt.show()
