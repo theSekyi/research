@@ -1544,10 +1544,6 @@ def plot_loss_functions(
 
     fig, ((ax1, ax2)) = plt.subplots(nrows=1, ncols=2, figsize=figsize)
 
-    # fig.suptitle(
-    #     f"Improvement of Ahunt after {len(all_ahunt_rws_iso[0])} rounds of training",
-    #     fontsize=14,
-    # )
     fig.subplots_adjust(top=0.94)  # Aligns title properly in the presence of fig.tight_layout
     fig.tight_layout(pad=4)
 
