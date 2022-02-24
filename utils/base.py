@@ -496,7 +496,12 @@ def get_latent(
 
     if network_saved._get_name() == "ResNet":
         layer = network_saved.fc[4]
+        # layer = network_saved.fc[2]
+
         # layer = network_saved.avgpool[4]
+        # layer = network_saved.layer4[0].conv2
+        # layer = network_saved.fc
+
     else:
         layer = network_saved.fc1
 
@@ -697,33 +702,7 @@ def get_combined_output(
         iso_precision.append(_iso_precision)
         iso_frac.append(_iso_frac)
 
-        # _latent_rws, _latent_mcc, _latent_recall, _latent_precision, _latent_frac = get_latent(
-        #     i,
-        #     testing_path,
-        #     _transforms,
-        #     train,
-        #     n_epoch,
-        #     optim,
-        #     Net,
-        #     learning_rate,
-        #     momentum,
-        #     saved_model_path,
-        #     train_latent_path,
-        #     batch_size_train,
-        #     batch_size_test,
-        #     anomaly_label,
-        #     loss,
-        #     query_strategy,
-        #     train_once,
-        #     device,
-        # )
-        # latent_mcc.append(_latent_mcc)
-        # latent_rws.append(_latent_rws)
-        # latent_recall.append(_latent_recall)
-        # latent_precision.append(_latent_precision)
-        # latent_frac.append(_latent_frac)
-
-        _ahunt_rws, _ahunt_mcc, _ahunt_recall, _ahunt_precision, _ahunt_frac = get_ahunt(
+        _latent_rws, _latent_mcc, _latent_recall, _latent_precision, _latent_frac = get_latent(
             i,
             testing_path,
             _transforms,
@@ -734,22 +713,48 @@ def get_combined_output(
             learning_rate,
             momentum,
             saved_model_path,
-            train_ahunt_path,
+            train_latent_path,
             batch_size_train,
             batch_size_test,
             anomaly_label,
-            initial_training_config,
             loss,
             query_strategy,
             train_once,
             device,
         )
+        latent_mcc.append(_latent_mcc)
+        latent_rws.append(_latent_rws)
+        latent_recall.append(_latent_recall)
+        latent_precision.append(_latent_precision)
+        latent_frac.append(_latent_frac)
 
-        ahunt_rws.append(_ahunt_rws)
-        ahunt_mcc.append(_ahunt_mcc)
-        ahunt_recall.append(_ahunt_recall)
-        ahunt_precision.append(_ahunt_precision)
-        ahunt_frac.append(_ahunt_frac)
+        # _ahunt_rws, _ahunt_mcc, _ahunt_recall, _ahunt_precision, _ahunt_frac = get_ahunt(
+        #     i,
+        #     testing_path,
+        #     _transforms,
+        #     train,
+        #     n_epoch,
+        #     optim,
+        #     Net,
+        #     learning_rate,
+        #     momentum,
+        #     saved_model_path,
+        #     train_ahunt_path,
+        #     batch_size_train,
+        #     batch_size_test,
+        #     anomaly_label,
+        #     initial_training_config,
+        #     loss,
+        #     query_strategy,
+        #     train_once,
+        #     device,
+        # )
+
+        # ahunt_rws.append(_ahunt_rws)
+        # ahunt_mcc.append(_ahunt_mcc)
+        # ahunt_recall.append(_ahunt_recall)
+        # ahunt_precision.append(_ahunt_precision)
+        # ahunt_frac.append(_ahunt_frac)
 
     return (
         iso_rws,
@@ -757,16 +762,16 @@ def get_combined_output(
         iso_recall,
         iso_precision,
         iso_frac,
-        # latent_rws,
-        # latent_mcc,
-        # latent_recall,
-        # latent_precision,
-        # latent_frac,
-        ahunt_rws,
-        ahunt_mcc,
-        ahunt_recall,
-        ahunt_precision,
-        ahunt_frac,
+        latent_rws,
+        latent_mcc,
+        latent_recall,
+        latent_precision,
+        latent_frac,
+        # ahunt_rws,
+        # ahunt_mcc,
+        # ahunt_recall,
+        # ahunt_precision,
+        # ahunt_frac,
     )
 
 

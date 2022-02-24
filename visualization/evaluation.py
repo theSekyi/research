@@ -1234,26 +1234,26 @@ def frac_mcc(
     fig.subplots_adjust(top=0.94)  # Aligns title properly in the presence of fig.tight_layout
 
     # MCC
-    mean, lower_quartile, upper_quartile = analyze(all_iso_mcc, cl=25)
+    mean, lower_quartile, upper_quartile = analyze(all_iso_mcc, cl=2.5)
     a_plt_fill(ax1, x, mean, lower_quartile, upper_quartile, "y", "iforest-raw")
 
-    mean, lower_quartile, upper_quartile = analyze(all_latent_mcc, cl=25)
+    mean, lower_quartile, upper_quartile = analyze(all_latent_mcc, cl=2.5)
     a_plt_fill(ax1, x, mean, lower_quartile, upper_quartile, "g", "iforest_latent-learning")
 
-    mean, lower_quartile, upper_quartile = analyze(all_ahunt_mcc, cl=25)
+    mean, lower_quartile, upper_quartile = analyze(all_ahunt_mcc, cl=2.5)
     a_plt_fill(ax1, x, mean, lower_quartile, upper_quartile, "b", "AHunt")
 
     ax1.set_xlabel("Rounds", fontsize=font_size)
     ax1.set_ylabel("MCC Score", fontsize=font_size)
 
     # FRACTION
-    mean, lower_quartile, upper_quartile = analyze(all_iso_frac, cl=25)
+    mean, lower_quartile, upper_quartile = analyze(all_iso_frac, cl=2.5)
     a_plt_fill(ax2, x, mean, lower_quartile, upper_quartile, "y", "iforest-raw")
 
-    mean, lower_quartile, upper_quartile = analyze(all_latent_frac, cl=25)
+    mean, lower_quartile, upper_quartile = analyze(all_latent_frac, cl=2.5)
     a_plt_fill(ax2, x, mean, lower_quartile, upper_quartile, "g", "iforest_latent-learning")
 
-    mean, lower_quartile, upper_quartile = analyze(all_ahunt_frac, cl=25)
+    mean, lower_quartile, upper_quartile = analyze(all_ahunt_frac, cl=2.5)
     a_plt_fill(ax2, x, mean, lower_quartile, upper_quartile, "b", "AHunt")
 
     ax2.set_xlabel("Rounds", fontsize=font_size)
