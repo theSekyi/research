@@ -498,7 +498,7 @@ def get_latent(
         layer = network_saved.fc[4]
         # layer = network_saved.fc[2]
 
-        # layer = network_saved.avgpool[4]
+        # layer = network_saved.avgpool
         # layer = network_saved.layer4[0].conv2
         # layer = network_saved.fc
 
@@ -728,33 +728,33 @@ def get_combined_output(
         latent_precision.append(_latent_precision)
         latent_frac.append(_latent_frac)
 
-        # _ahunt_rws, _ahunt_mcc, _ahunt_recall, _ahunt_precision, _ahunt_frac = get_ahunt(
-        #     i,
-        #     testing_path,
-        #     _transforms,
-        #     train,
-        #     n_epoch,
-        #     optim,
-        #     Net,
-        #     learning_rate,
-        #     momentum,
-        #     saved_model_path,
-        #     train_ahunt_path,
-        #     batch_size_train,
-        #     batch_size_test,
-        #     anomaly_label,
-        #     initial_training_config,
-        #     loss,
-        #     query_strategy,
-        #     train_once,
-        #     device,
-        # )
+        _ahunt_rws, _ahunt_mcc, _ahunt_recall, _ahunt_precision, _ahunt_frac = get_ahunt(
+            i,
+            testing_path,
+            _transforms,
+            train,
+            n_epoch,
+            optim,
+            Net,
+            learning_rate,
+            momentum,
+            saved_model_path,
+            train_ahunt_path,
+            batch_size_train,
+            batch_size_test,
+            anomaly_label,
+            initial_training_config,
+            loss,
+            query_strategy,
+            train_once,
+            device,
+        )
 
-        # ahunt_rws.append(_ahunt_rws)
-        # ahunt_mcc.append(_ahunt_mcc)
-        # ahunt_recall.append(_ahunt_recall)
-        # ahunt_precision.append(_ahunt_precision)
-        # ahunt_frac.append(_ahunt_frac)
+        ahunt_rws.append(_ahunt_rws)
+        ahunt_mcc.append(_ahunt_mcc)
+        ahunt_recall.append(_ahunt_recall)
+        ahunt_precision.append(_ahunt_precision)
+        ahunt_frac.append(_ahunt_frac)
 
     return (
         iso_rws,
@@ -767,11 +767,11 @@ def get_combined_output(
         latent_recall,
         latent_precision,
         latent_frac,
-        # ahunt_rws,
-        # ahunt_mcc,
-        # ahunt_recall,
-        # ahunt_precision,
-        # ahunt_frac,
+        ahunt_rws,
+        ahunt_mcc,
+        ahunt_recall,
+        ahunt_precision,
+        ahunt_frac,
     )
 
 

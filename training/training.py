@@ -225,7 +225,7 @@ def train(
         optimizer.step()
 
         train_losses = loss.item()
-        # print(f"\t Batch {batch_idx + 1}/{n_batches} | Training Loss {train_losses}")
+        print(f"\t Batch {batch_idx + 1}/{n_batches} | Training Loss {train_losses}")
 
     torch.save(network.state_dict(), saved_model_path)
     torch.save(optimizer.state_dict(), "data/mnist/results/optimizer.pth")
@@ -267,7 +267,7 @@ def training_loop(
 
     train_losses = []
     for epoch in range(1, n_epoch):
-        # print(f"{color.BOLD}Epoch {epoch}/{n_epoch - 1} {color.END}")
+        print(f"{color.BOLD}Epoch {epoch}/{n_epoch - 1} {color.END}")
         train_loss, model = train_func(
             epoch,
             optimizer,
