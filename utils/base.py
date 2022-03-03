@@ -2019,11 +2019,12 @@ def load_optim(optim, model, path, learning_rate, momentum):
     return optimizer
 
 
-def get_transforms():
+def get_transforms_galaxy():
     import torchvision.transforms as transforms
 
     _transform = transforms.Compose(
         [
+            transforms.Resize((64, 64)),
             transforms.RandomApply(
                 [
                     transforms.ColorJitter(),
@@ -2033,7 +2034,6 @@ def get_transforms():
                 p=0.3,
             ),
             transforms.RandomAffine(10, scale=(0.8, 1.2)),
-            transforms.Resize((64, 64)),
             transforms.ToTensor(),
         ]
     )
@@ -2041,6 +2041,34 @@ def get_transforms():
         [
             transforms.Resize((64, 64)),
             transforms.RandomAffine(10, scale=(0.8, 1.2)),
+            transforms.ToTensor(),
+        ]
+    )
+    return _transform, _test_transform
+
+
+def get_transforms():
+    import torchvision.transforms as transforms
+
+    _transform = transforms.Compose(
+        [
+            # transforms.Resize((64, 64)),
+            transforms.RandomApply(
+                [
+                    transforms.ColorJitter(),
+                    transforms.GaussianBlur(11, sigma=(0.1, 2.0)),
+                    # transforms.RandomErasing(),
+                ],
+                p=0.3,
+            ),
+            # transforms.RandomAffine(10, scale=(0.8, 1.2)),
+            transforms.ToTensor(),
+        ]
+    )
+    _test_transform = transforms.Compose(
+        [
+            # transforms.Resize((64, 64)),
+            # transforms.RandomAffine(10, scale=(0.8, 1.2)),
             transforms.ToTensor(),
         ]
     )
@@ -2343,8 +2371,8 @@ def galaxy_parameters(anomaly_label, classifier, galaxy_params):
     saved_model_path = "data/galaxy_zoo/results/model.pth"
 
     n_epoch = galaxy_params["n_epoch"]
-    batch_size_train = 64
-    batch_size_test = 32
+    batch_size_train = 8
+    batch_size_test = 8
     learning_rate = 0.01
     momentum = 0.5
     log_interval = 10
@@ -2359,7 +2387,7 @@ def galaxy_parameters(anomaly_label, classifier, galaxy_params):
     train_once = galaxy_params["train_once"]
 
     test_pth = test_paths(galaxy_test_path)
-    _transforms, _test_transform = get_transforms_mnist()
+    _transforms, _test_transform = get_transforms_galaxy()
 
     return (
         test_pth,
