@@ -331,17 +331,6 @@ def compute_iforest_rws(labels, scores):
     return isof_rws_dec
 
 
-def get_true_and_pred_labels(labels_np, scores_decision):
-    n_anomalies = np.sum(labels_np)
-
-    threshold = np.sort(scores_decision)[-n_anomalies - 1]
-
-    y_pred = scores_decision > threshold
-    y_true = labels_np.astype(int)
-
-    return y_true, y_pred
-
-
 def compute_iforest_mcc(labels_np, scores):
 
     scores = scores.max() - scores
@@ -664,6 +653,7 @@ def get_combined_output(
     loss,
     query_strategy,
     train_once,
+    which_train,
     device,
 ):
     iso_rws = []
@@ -693,68 +683,71 @@ def get_combined_output(
         else:
             testing_path = pth
 
-        _iso_rws, _iso_mcc, _iso_recall, _iso_precision, _iso_frac = get_iforest(
-            i, testing_path, _transforms, train_iforest_path, anomaly_label, iforest_use_all
-        )
-        iso_rws.append(_iso_rws)
-        iso_mcc.append(_iso_mcc)
-        iso_recall.append(_iso_recall)
-        iso_precision.append(_iso_precision)
-        iso_frac.append(_iso_frac)
+        if which_train["train_iso"]:
+            _iso_rws, _iso_mcc, _iso_recall, _iso_precision, _iso_frac = get_iforest(
+                i, testing_path, _transforms, train_iforest_path, anomaly_label, iforest_use_all
+            )
+            iso_rws.append(_iso_rws)
+            iso_mcc.append(_iso_mcc)
+            iso_recall.append(_iso_recall)
+            iso_precision.append(_iso_precision)
+            iso_frac.append(_iso_frac)
 
-        _latent_rws, _latent_mcc, _latent_recall, _latent_precision, _latent_frac = get_latent(
-            i,
-            testing_path,
-            _transforms,
-            train,
-            n_epoch,
-            optim,
-            Net,
-            learning_rate,
-            momentum,
-            saved_model_path,
-            train_latent_path,
-            batch_size_train,
-            batch_size_test,
-            anomaly_label,
-            loss,
-            query_strategy,
-            train_once,
-            device,
-        )
-        latent_mcc.append(_latent_mcc)
-        latent_rws.append(_latent_rws)
-        latent_recall.append(_latent_recall)
-        latent_precision.append(_latent_precision)
-        latent_frac.append(_latent_frac)
+        if which_train["train_latent"]:
+            _latent_rws, _latent_mcc, _latent_recall, _latent_precision, _latent_frac = get_latent(
+                i,
+                testing_path,
+                _transforms,
+                train,
+                n_epoch,
+                optim,
+                Net,
+                learning_rate,
+                momentum,
+                saved_model_path,
+                train_latent_path,
+                batch_size_train,
+                batch_size_test,
+                anomaly_label,
+                loss,
+                query_strategy,
+                train_once,
+                device,
+            )
+            latent_mcc.append(_latent_mcc)
+            latent_rws.append(_latent_rws)
+            latent_recall.append(_latent_recall)
+            latent_precision.append(_latent_precision)
+            latent_frac.append(_latent_frac)
 
-        _ahunt_rws, _ahunt_mcc, _ahunt_recall, _ahunt_precision, _ahunt_frac = get_ahunt(
-            i,
-            testing_path,
-            _transforms,
-            train,
-            n_epoch,
-            optim,
-            Net,
-            learning_rate,
-            momentum,
-            saved_model_path,
-            train_ahunt_path,
-            batch_size_train,
-            batch_size_test,
-            anomaly_label,
-            initial_training_config,
-            loss,
-            query_strategy,
-            train_once,
-            device,
-        )
+        if which_train["train_ahunt"]:
+            _ahunt_rws, _ahunt_mcc, _ahunt_recall, _ahunt_precision, _ahunt_frac = get_ahunt(
+                i,
+                testing_path,
+                _transforms,
+                train,
+                n_epoch,
+                optim,
+                Net,
+                learning_rate,
+                momentum,
+                saved_model_path,
+                train_ahunt_path,
+                batch_size_train,
+                batch_size_test,
+                anomaly_label,
+                initial_training_config,
+                loss,
+                query_strategy,
+                train_once,
+                device,
+            )
 
-        ahunt_rws.append(_ahunt_rws)
-        ahunt_mcc.append(_ahunt_mcc)
-        ahunt_recall.append(_ahunt_recall)
-        ahunt_precision.append(_ahunt_precision)
-        ahunt_frac.append(_ahunt_frac)
+            ahunt_rws.append(_ahunt_rws)
+            ahunt_mcc.append(_ahunt_mcc)
+            ahunt_recall.append(_ahunt_recall)
+            ahunt_precision.append(_ahunt_precision)
+            ahunt_frac.append(_ahunt_frac)
 
     return (
         iso_rws,
@@ -775,6 +768,60 @@ def get_combined_output(
     )
 
 
+def n_most_anomalous_images(scores_decision, test_paths, num_to_display):
+
+    _, _anomalous_paths = zip(*sorted(zip(scores_decision, test_paths), reverse=True))
+
+    selected_anomalies = _anomalous_paths[:num_to_display]
+
+    return selected_anomalies
+
+
+def m_confused_score(scores_decision):
+
+    z_clf = np.array(scores_decision)
+    z_clf[z_clf < 0.5] = 0
+
+    # if np.sum(z_clf) == 0:
+    #     return np.abs(0.5 - np.array(scores_decision))
+    # else:
+    confused = 1 - np.abs(0.5 - z_clf)
+    return confused
+
+
+def n_most_confused(scores_decision, test_paths, num_to_display):
+    # anomalous_indices = np.array(prob_difference).argsort()[:num_to_display]
+    result = np.max(scores_decision) == np.min(scores_decision) == 0.5
+    _, _anomalous_paths = zip(*sorted(zip(scores_decision.tolist(), test_paths), reverse=True))
+
+    selected_anomalies = _anomalous_paths[:num_to_display]
+
+    if result:  # used when no anomaly is detected in the zeroth round
+        selected_anomalies = mnist_selected(_anomalous_paths, label_count={"5": 1, "1": 2, "0": 3})
+
+    # anomalous_indices = np.argsort(z_clf)[:num_to_display]  # [::-1]
+    # selected_anomalies = [test_paths[index] for index in anomalous_indices]
+    return selected_anomalies
+
+
+def n_choose_randomly(scores_decision, test_paths, num_to_display):
+    import random
+
+    random_indices = random.sample(range(len(test_paths)), num_to_display)
+    selected_anomalies = [test_paths[i] for i in random_indices]
+    return selected_anomalies
+
+
+def n_from_lowest(scores_decision, test_paths, num_to_display):
+    z_clf = np.array(scores_decision)
+    z_clf[z_clf < 0.5] = 0
+    scr_ano = 1 - 2 * np.abs(z_clf - 0.5)
+    anomalous_indices = np.argsort(scr_ano)[::-1]
+    anomalous_indices_selected = anomalous_indices[:num_to_display]
+    selected_anomalies = [test_paths[index] for index in anomalous_indices_selected]
+    return selected_anomalies
+
+
 def output_query_strategy(
     query_strategy,
     scores_decision,
@@ -790,11 +837,24 @@ def output_query_strategy(
         confused_scores = m_confused_score(scores_decision)
         selected_anomalies = n_most_confused(confused_scores, all_test_paths, num_to_display)
         y_true, y_pred = get_true_and_pred_labels(labels_np, confused_scores)
+    elif query_strategy == "random":
+        selected_anomalies = n_choose_randomly(scores_decision, all_test_paths, num_to_display)
+        y_true, y_pred = get_true_and_pred_labels(labels_np, scores_decision)
     elif query_strategy == "from_lowest":
         selected_anomalies = n_from_lowest(scores_decision, all_test_paths, num_to_display)
         y_true, y_pred = get_true_and_pred_labels(labels_np, scores_decision)
-
     return y_true, y_pred, selected_anomalies
+
+
+def get_true_and_pred_labels(labels_np, scores_decision):
+    n_anomalies = np.sum(labels_np)
+
+    threshold = np.sort(scores_decision)[-n_anomalies - 1]
+
+    y_pred = scores_decision > threshold
+    y_true = labels_np.astype(int)
+
+    return y_true, y_pred
 
 
 def evaluate_model(model, test_loader):
@@ -1642,52 +1702,6 @@ def rm_checkpoint(src):
     file_to_rem.unlink()
 
 
-def n_most_anomalous_images(scores_decision, test_paths, num_to_display):
-
-    _, _anomalous_paths = zip(*sorted(zip(scores_decision, test_paths), reverse=True))
-
-    selected_anomalies = _anomalous_paths[:num_to_display]
-
-    return selected_anomalies
-
-
-def m_confused_score(scores_decision):
-
-    z_clf = np.array(scores_decision)
-    z_clf[z_clf < 0.5] = 0
-
-    # if np.sum(z_clf) == 0:
-    #     return np.abs(0.5 - np.array(scores_decision))
-    # else:
-    confused = 1 - np.abs(0.5 - z_clf)
-    return confused
-
-
-def n_most_confused(scores_decision, test_paths, num_to_display):
-    # anomalous_indices = np.array(prob_difference).argsort()[:num_to_display]
-    result = np.max(scores_decision) == np.min(scores_decision) == 0.5
-    _, _anomalous_paths = zip(*sorted(zip(scores_decision.tolist(), test_paths), reverse=True))
-
-    selected_anomalies = _anomalous_paths[:num_to_display]
-
-    if result:  # used when no anomaly is detected in the zeroth round
-        selected_anomalies = mnist_selected(_anomalous_paths, label_count={"5": 1, "1": 2, "0": 3})
-
-    # anomalous_indices = np.argsort(z_clf)[:num_to_display]  # [::-1]
-    # selected_anomalies = [test_paths[index] for index in anomalous_indices]
-    return selected_anomalies
-
-
-def n_from_lowest(scores_decision, test_paths, num_to_display):
-    z_clf = np.array(scores_decision)
-    z_clf[z_clf < 0.5] = 0
-    scr_ano = 1 - 2 * np.abs(z_clf - 0.5)
-    anomalous_indices = np.argsort(scr_ano)[::-1]
-    anomalous_indices_selected = anomalous_indices[:num_to_display]
-    selected_anomalies = [test_paths[index] for index in anomalous_indices_selected]
-    return selected_anomalies
-
-
 def mnist_selected(_anomalous_paths, label_count={"5": 1, "1": 2, "0": 3}):
     import random
 
@@ -2371,8 +2385,8 @@ def galaxy_parameters(anomaly_label, classifier, galaxy_params):
     saved_model_path = "data/galaxy_zoo/results/model.pth"
 
     n_epoch = galaxy_params["n_epoch"]
-    batch_size_train = 8
-    batch_size_test = 8
+    batch_size_train = 32
+    batch_size_test = 32
     learning_rate = 0.01
     momentum = 0.5
     log_interval = 10
