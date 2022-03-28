@@ -494,7 +494,7 @@ def get_latent(
     else:
         layer = network_saved.fc1
 
-    all_test_paths, labels_np, scores_decision, test_labels = results_from_latent(
+    all_test_paths, labels_np, scores_decision, test_labels, predicted_labels = results_from_latent(
         network_saved, train_ds, test_ds, _transforms, anomaly_label, device, layer
     )
 
@@ -505,11 +505,7 @@ def get_latent(
     num_to_display = np.sum(labels_np)
 
     y_true, y_pred, selected_anomalies = output_query_strategy(
-        query_strategy,
-        scores_decision,
-        all_test_paths,
-        num_to_display,
-        labels_np,
+        query_strategy, scores_decision, all_test_paths, num_to_display, labels_np, predicted_labels, anomaly_label
     )
 
     add_anomalies_to_training(selected_anomalies, train_latent_path)
@@ -608,11 +604,7 @@ def get_ahunt(
     num_to_display = np.sum(labels_np)
 
     y_true, y_pred, selected_anomalies = output_query_strategy(
-        query_strategy,
-        scores_decision,
-        all_test_paths,
-        num_to_display,
-        labels_np,
+        query_strategy, scores_decision, all_test_paths, num_to_display, labels_np, predicted_labels, anomaly_idx
     )
 
     add_anomalies_to_training(selected_anomalies, train_ahunt_path)
@@ -804,6 +796,13 @@ def n_most_confused(scores_decision, test_paths, num_to_display):
     return selected_anomalies
 
 
+def get_predictions_for_random_active(labels_np, predicted_labels, anomaly_idx):
+    predicted_np = np.array([1 if i == anomaly_idx else 0 for i in predicted_labels])
+    y_true = labels_np.astype(int)
+    y_pred = predicted_np.astype(int)
+    return y_true, y_pred
+
+
 def n_choose_randomly(scores_decision, test_paths, num_to_display):
     import random
 
@@ -823,11 +822,7 @@ def n_from_lowest(scores_decision, test_paths, num_to_display):
 
 
 def output_query_strategy(
-    query_strategy,
-    scores_decision,
-    all_test_paths,
-    num_to_display,
-    labels_np,
+    query_strategy, scores_decision, all_test_paths, num_to_display, labels_np, predicted_labels, anomaly_idx
 ):
 
     if query_strategy == "most_anomalous":
@@ -839,10 +834,11 @@ def output_query_strategy(
         y_true, y_pred = get_true_and_pred_labels(labels_np, confused_scores)
     elif query_strategy == "random":
         selected_anomalies = n_choose_randomly(scores_decision, all_test_paths, num_to_display)
-        y_true, y_pred = get_true_and_pred_labels(labels_np, scores_decision)
+        y_true, y_pred = get_predictions_for_random_active(labels_np, predicted_labels, anomaly_idx)
     elif query_strategy == "from_lowest":
         selected_anomalies = n_from_lowest(scores_decision, all_test_paths, num_to_display)
         y_true, y_pred = get_true_and_pred_labels(labels_np, scores_decision)
+
     return y_true, y_pred, selected_anomalies
 
 
@@ -1245,12 +1241,14 @@ def results_from_latent(model, train_ds, test_ds, transform, anomaly_label, devi
     iforest.fit(np.array(train_activations))
 
     scores_decision = iforest.decision_function(test_activations)  # the lower, the more anomalous
+    predictions = iforest.predict(test_activations)
 
     scores_decision = scores_decision.max() - scores_decision
 
     labels_np = np.array([True if Path(x).parent.name == anomaly_label else False for x in test_paths])
+    predict_np = [True if i == -1 else False for i in predictions]
 
-    return test_paths, labels_np, scores_decision, test_labels
+    return test_paths, labels_np, scores_decision, test_labels, predict_np
 
 
 def results_from_latent_trial(model, train_ds, test_ds, anomaly_label, device, layer):
